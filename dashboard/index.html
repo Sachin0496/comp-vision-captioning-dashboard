@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Static research dashboard: does better image-captioning BLEU mean fewer object hallucinations?">
+  <meta name="color-scheme" content="light">
+  <title>Do Better Captions Hallucinate Less? — Research Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="masthead" id="top">
+    <div class="wrap masthead__inner">
+      <div class="masthead__brand">
+        <span class="eyebrow">Research dashboard</span>
+        <span class="masthead__rule" aria-hidden="true"></span>
+        <span class="masthead__meta" id="generated-at"></span>
+      </div>
+      <button class="btn btn--small print-btn" type="button" data-action="print">
+        <span aria-hidden="true">⎙</span> Print / Save PDF
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <section class="error-panel" id="error-panel" hidden aria-labelledby="error-title">
+        <p class="eyebrow">Data not loaded</p>
+        <h2 id="error-title" class="error-panel__title">The dashboard data could not be found.</h2>
+        <p class="error-panel__lead" id="error-lead">
+          This page is a static shell. It renders whatever <code>window.DASHBOARD_DATA</code> contains,
+          and nothing was defined.
+        </p>
+        <div class="error-panel__howto">
+          <h2>Generate the payload</h2>
+          <p>From the repository root, run:</p>
+          <pre><code>python scripts/build_dashboard.py</code></pre>
+          <p>
+            The script writes <code>dashboard/data/dashboard-data.js</code> plus images and figures under
+            <code>dashboard/assets/</code>. Then reload this page. Because the data is a plain script
+            assignment, everything works from a <code>file://</code> URL with no server.
+          </p>
+        </div>
+        <p class="error-panel__detail" id="error-detail"></p>
+      </section>
+
+      <div class="shell" id="shell" hidden>
+        <nav class="site-nav" id="site-nav" aria-label="Sections" hidden>
+          <p class="eyebrow site-nav__label">Contents</p>
+          <ul class="site-nav__list" id="nav-list" role="list"></ul>
+          <p class="site-nav__note">Static build · works offline</p>
+        </nav>
+
+        <div class="content" id="dashboard-body">
+
+          <!-- ══ Overview ══════════════════════════════════════════ -->
+          <section class="section" id="overview" aria-labelledby="overview-title">
+            <header class="hero">
+              <div class="hero__copy">
+                <p class="eyebrow" id="overview-kicker">Image captioning · object hallucination · COCO 2017</p>
+                <h1 id="overview-title" class="hero__title">Do better captions hallucinate less?</h1>
+                <p class="hero__subtitle" id="overview-subtitle"></p>
+              </div>
+              <div class="hero__aside" id="overview-facts" aria-label="Study facts"></div>
+            </header>
+
+            <div class="qa">
+              <div class="qa__item">
+                <h2 class="subhead">Research question</h2>
+                <p class="qa__text" id="research-question"></p>
+              </div>
+              <div class="qa__item">
+                <h2 class="subhead">One-paragraph answer</h2>
+                <p class="qa__text qa__text--answer" id="research-answer"></p>
+              </div>
+            </div>
+
+            <div class="kpi-grid" id="kpi-grid" aria-label="Headline results"></div>
+
+            <div class="split-panel">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">At a glance</h2>
+                  <p class="panel__note">Higher BLEU-4 and lower CHAIRs are better.</p>
+                </div>
+                <div id="glance-bars" class="glance"></div>
+                <div class="legend" id="glance-legend"></div>
+              </div>
+              <aside class="note-card" aria-labelledby="howto-title">
+                <h2 class="subhead" id="howto-title">How to read this</h2>
+                <ul class="note-list" id="reading-notes"></ul>
+              </aside>
+            </div>
+          </section>
+
+          <!-- ══ Pipeline ══════════════════════════════════════════ -->
+          <section class="section" id="pipeline" aria-labelledby="pipeline-title">
+            <header class="section__head">
+              <p class="eyebrow">01 — Coverage</p>
+              <h2 id="pipeline-title" class="section__title">Task coverage</h2>
+              <p class="section__dek">Assignment requirements, what was run, and the artefacts that evidence it.</p>
+            </header>
+
+            <div class="coverage" id="task-coverage"></div>
+
+            <h3 class="subhead subhead--ruled">Reproducible pipeline</h3>
+            <ol class="stepper" id="pipeline-stepper" role="list"></ol>
+          </section>
+
+          <!-- ══ Dataset ═══════════════════════════════════════════ -->
+          <section class="section" id="dataset" aria-labelledby="dataset-title">
+            <header class="section__head">
+              <p class="eyebrow">02 — Data</p>
+              <h2 id="dataset-title" class="section__title">Dataset &amp; splits</h2>
+              <p class="section__dek" id="dataset-dek"></p>
+            </header>
+
+            <div class="stat-strip" id="dataset-strip"></div>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Split composition</h2>
+                  <p class="panel__note" id="split-note"></p>
+                </div>
+                <div id="split-bars" class="split-bars"></div>
+                <div id="split-table"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Caption length</h2>
+                  <p class="panel__note">Tokens per caption, training split.</p>
+                </div>
+                <div id="caption-stats" class="mini-stats"></div>
+              </div>
+            </div>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Most frequent COCO objects</h2>
+                  <p class="panel__note">Ground-truth annotations across all images.</p>
+                </div>
+                <div id="top-objects" class="bar-list"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Detector</h2>
+                  <p class="panel__note">Independent of the captioners; test labels never seen.</p>
+                </div>
+                <dl class="def-list" id="detector-stats"></dl>
+              </div>
+            </div>
+
+            <aside class="note-card note-card--wide" aria-labelledby="dataset-notes-title">
+              <h2 class="subhead" id="dataset-notes-title">Notes on this split</h2>
+              <ul class="note-list" id="dataset-notes"></ul>
+            </aside>
+          </section>
+
+          <!-- ══ Models ════════════════════════════════════════════ -->
+          <section class="section" id="models" aria-labelledby="models-title">
+            <header class="section__head">
+              <p class="eyebrow">03 — Models</p>
+              <h2 id="models-title" class="section__title">Three captioners, one decoder</h2>
+              <p class="section__dek" id="models-dek"></p>
+            </header>
+
+            <div class="model-grid" id="model-cards"></div>
+
+            <div class="panel panel--table">
+              <div class="panel__head panel__head--row">
+                <div>
+                  <h2 class="subhead">Full metrics table</h2>
+                  <p class="panel__note">Click a column header to sort. Percentages are 0–100; CIDEr-D uses its 0–10 scale.</p>
+                </div>
+                <div class="table-tools">
+                  <label class="field">
+                    <span class="field__label">Sort by</span>
+                    <select id="metrics-sort" class="select">
+                      <option value="bleu4">BLEU-4</option>
+                      <option value="chair_s">CHAIRs</option>
+                      <option value="chair_i">CHAIRi</option>
+                      <option value="cider_d">CIDEr-D</option>
+                      <option value="object_f1">Object F1</option>
+                      <option value="bleu1">BLEU-1</option>
+                      <option value="bleu2">BLEU-2</option>
+                      <option value="bleu3">BLEU-3</option>
+                      <option value="object_precision">Object precision</option>
+                      <option value="object_recall">Object recall</option>
+                      <option value="params">Parameters</option>
+                      <option value="train_minutes">Train time</option>
+                    </select>
+                  </label>
+                  <button class="btn btn--small" type="button" id="metrics-dir" aria-pressed="true">
+                    <span aria-hidden="true" id="metrics-dir-icon">↓</span>
+                    <span id="metrics-dir-label">Descending</span>
+                  </button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table" id="metrics-table">
+                  <caption class="sr-only">Caption-quality and grounding metrics for the three models</caption>
+                  <thead></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <p class="table-status" id="metrics-status" role="status" aria-live="polite"></p>
+            </div>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Matched metric bars</h2>
+                  <p class="panel__note">Normalised within each metric; the best value is highlighted.</p>
+                </div>
+                <div id="model-metric-bars" class="metric-bars"></div>
+              </div>
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Training curves</h2>
+                  <p class="panel__note" id="training-note">Validation loss and BLEU-4 per epoch.</p>
+                </div>
+                <div id="training-curves" class="curve-wrap"></div>
+                <div class="legend" id="training-legend"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ══ Hallucination ═════════════════════════════════════ -->
+          <section class="section" id="hallucination" aria-labelledby="hallucination-title">
+            <header class="section__head">
+              <p class="eyebrow">04 — Grounding</p>
+              <h2 id="hallucination-title" class="section__title">Object hallucination</h2>
+              <p class="section__dek">CHAIRs is the share of object mentions absent from the image; CHAIRi is the share of captions with at least one.</p>
+            </header>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">CHAIRs vs CHAIRi</h2>
+                  <p class="panel__note">Both lower-is-better. Bars scaled to the observed maximum.</p>
+                </div>
+                <div id="chair-compare" class="chair-compare"></div>
+              </div>
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Most hallucinated objects</h2>
+                  <p class="panel__note">Classes named by a model but absent from the image's annotations.</p>
+                </div>
+                <div id="top-hallucinated" class="bar-list bar-list--warn"></div>
+              </div>
+            </div>
+
+            <div class="panel__head panel__head--row panel__head--standalone">
+              <div>
+                <h2 class="subhead">Worked examples</h2>
+                <p class="panel__note">Hallucinated object words are marked in red. Punctuation is preserved.</p>
+              </div>
+              <div class="legend" id="hallucination-legend"></div>
+            </div>
+            <div class="example-grid" id="hallucination-examples"></div>
+          </section>
+
+          <!-- ══ BLEU vs CHAIR ═════════════════════════════════════ -->
+          <section class="section" id="bleu-chair" aria-labelledby="bleu-title">
+            <header class="section__head">
+              <p class="eyebrow">05 — Analysis</p>
+              <h2 id="bleu-title" class="section__title">BLEU vs CHAIR</h2>
+              <p class="section__dek">Does n-gram overlap predict grounding? Rank correlations, quartiles, and a matched-BLEU comparison.</p>
+            </header>
+
+            <div class="corr-grid" id="correlation-cards"></div>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Pooled BLEU-4 quartiles</h2>
+                  <p class="panel__note">All 1,500 captions, grouped by sentence BLEU-4.</p>
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table data-table--compact" id="quartile-table">
+                    <caption class="sr-only">Hallucination rate by pooled BLEU-4 quartile</caption>
+                    <thead></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="quartile-chart" id="quartile-chart" aria-hidden="true"></div>
+              </div>
+
+              <figure class="figure-card">
+                <div class="figure-card__img">
+                  <button class="figure-card__zoom" type="button" data-lightbox-target="figure" data-figure="bleu_vs_hallucination" aria-label="Enlarge the BLEU vs hallucination figure">
+                    <img data-figure="bleu_vs_hallucination" alt="Scatter plot of sentence BLEU-4 against hallucinated objects per caption, with a binned trend and bootstrap intervals." loading="lazy" decoding="async">
+                  </button>
+                </div>
+                <figcaption>
+                  <span class="figure-card__label">Figure · BLEU vs hallucination</span>
+                  <span class="figure-card__caption" data-figure-caption="bleu_vs_hallucination"></span>
+                  <button class="btn btn--ghost btn--small" type="button" data-lightbox-target="figure" data-figure="bleu_vs_hallucination">Enlarge</button>
+                </figcaption>
+              </figure>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head panel__head--row">
+                <div>
+                  <h2 class="subhead">Matched-BLEU hallucination rate</h2>
+                  <p class="panel__note">Within each sentence-BLEU bin, lower is better. Error bars are 95% bootstrap CIs where available.</p>
+                </div>
+                <div class="legend" id="matched-legend"></div>
+              </div>
+              <div class="chart-scroll">
+                <div class="matched-chart" id="matched-chart"></div>
+              </div>
+              <p class="insight" id="matched-insight"></p>
+            </div>
+          </section>
+
+          <!-- ══ Attention ═════════════════════════════════════════ -->
+          <section class="section" id="attention" aria-labelledby="attention-title">
+            <header class="section__head">
+              <p class="eyebrow">06 — Interpretability</p>
+              <h2 id="attention-title" class="section__title">Attention explorer</h2>
+              <p class="section__dek">Pick an example, then a word, to see where the decoder looked. Toggle the overlay on and off.</p>
+            </header>
+
+            <div class="attention" id="attention-explorer">
+              <div class="attention__side">
+                <div class="panel">
+                  <div class="panel__head">
+                    <h2 class="subhead">Examples</h2>
+                    <p class="panel__note">Four test images with stored maps.</p>
+                  </div>
+                  <div class="example-list" id="attention-example-list" role="group" aria-label="Attention examples"></div>
+                </div>
+                <div class="panel">
+                  <div class="panel__head">
+                    <h2 class="subhead">Words</h2>
+                    <p class="panel__note">Select a word to change the overlay.</p>
+                  </div>
+                  <div class="chips" id="attention-chips" role="group" aria-label="Caption words"></div>
+                  <div class="segmented" id="attention-toggle" role="group" aria-label="Image display mode">
+                    <button type="button" class="segmented__btn is-active" data-mode="overlay" aria-pressed="true">Overlay</button>
+                    <button type="button" class="segmented__btn" data-mode="base" aria-pressed="false">Base</button>
+                  </div>
+                  <p class="micro-note" id="attention-status" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+
+              <div class="attention__main">
+                <figure class="attention-figure">
+                  <div class="attention-figure__frame">
+                    <div class="img-frame img-frame--attention" id="attention-image-frame">
+                      <img id="attention-image" alt="" decoding="async">
+                      <img id="attention-overlay" alt="" decoding="async" hidden>
+                    </div>
+                    <button class="zoom-badge" type="button" data-lightbox-target="attention" aria-label="Open the attention image in the lightbox">
+                      <span aria-hidden="true">⛶</span> Enlarge
+                    </button>
+                  </div>
+                  <figcaption class="attention-caption">
+                    <span class="eyebrow" id="attention-caption-label">Generated caption</span>
+                    <p class="attention-caption__text" id="attention-caption-text"></p>
+                    <p class="attention-caption__meta" id="attention-meta"></p>
+                  </figcaption>
+                </figure>
+                <div class="thumb-strip" id="attention-thumbs" role="group" aria-label="Attention example thumbnails"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ══ Gallery ═══════════════════════════════════════════ -->
+          <section class="section" id="gallery" aria-labelledby="gallery-title">
+            <header class="section__head">
+              <p class="eyebrow">07 — Qualitative</p>
+              <h2 id="gallery-title" class="section__title">Example gallery</h2>
+              <p class="section__dek" id="gallery-dek">Eight held-out images with all three captions. Filter by model or search caption text.</p>
+            </header>
+
+            <div class="toolbar" id="gallery-toolbar">
+              <div class="filter-chips" id="gallery-filters" role="group" aria-label="Filter by model"></div>
+              <div class="search-field">
+                <label class="sr-only" for="gallery-search">Search captions and objects</label>
+                <input type="search" id="gallery-search" class="input" placeholder="Search captions, objects, image id…" autocomplete="off" spellcheck="false">
+                <span class="search-field__hint" aria-hidden="true">⌕</span>
+              </div>
+              <p class="toolbar__status" id="gallery-status" role="status" aria-live="polite"></p>
+            </div>
+
+            <div class="example-grid example-grid--gallery" id="gallery-grid"></div>
+            <p class="empty-state" id="gallery-empty" hidden>No examples match that filter and search.</p>
+          </section>
+
+          <!-- ══ Report ════════════════════════════════════════════ -->
+          <section class="section" id="report" aria-labelledby="report-title">
+            <header class="section__head">
+              <p class="eyebrow">08 — Deliverables</p>
+              <h2 id="report-title" class="section__title">Report &amp; downloads</h2>
+              <p class="section__dek">The written report, the metric tables, and the raw predictor. Nothing leaves this machine.</p>
+            </header>
+
+            <div class="download-grid" id="download-cards"></div>
+
+            <div class="grid grid--2">
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Reproducibility</h2>
+                  <p class="panel__note">Deterministic where possible; seeds recorded in the payload.</p>
+                </div>
+                <ul class="note-list note-list--tight" id="repro-notes"></ul>
+              </div>
+              <div class="panel">
+                <div class="panel__head">
+                  <h2 class="subhead">Figures</h2>
+                  <p class="panel__note">Click any figure to enlarge.</p>
+                </div>
+                <div class="figure-list" id="figure-list"></div>
+                <div class="report-actions">
+                  <button class="btn" type="button" data-action="print">
+                    <span aria-hidden="true">⎙</span> Print / Save PDF
+                  </button>
+                  <span class="report-actions__hint">Opens the browser print dialog; this page is a static file.</span>
+                </div>
+              </div>
+            </div>
+
+            <footer class="site-footer">
+              <p id="footer-meta"></p>
+              <p>Static, offline, no external assets. <a href="#top">Back to top</a></p>
+            </footer>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title" hidden>
+    <div class="lightbox__backdrop" data-lightbox-close></div>
+    <div class="lightbox__dialog" role="document">
+      <div class="lightbox__bar">
+        <h2 class="lightbox__title" id="lightbox-title">Figure</h2>
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="Close image viewer">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div class="lightbox__stage">
+        <img id="lightbox-img" alt="" decoding="async">
+        <p class="lightbox__error" id="lightbox-error" hidden>This image is not available in the build.</p>
+      </div>
+      <p class="lightbox__caption" id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <script src="data/dashboard-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

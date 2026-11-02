@@ -1,0 +1,310 @@
+{
+  "global": {
+    "model": "global",
+    "analysis": {
+      "n": 500,
+      "spearman_bleu4_vs_n_hallucinated": {
+        "rho": -0.32580330928514173,
+        "p_value": 7.911969045892554e-14,
+        "n": 500
+      },
+      "spearman_bleu2_vs_has_hallucination": {
+        "rho": -0.3103100373328055,
+        "p_value": 1.271964263482245e-12,
+        "n": 500
+      },
+      "pearson_bleu4_vs_has_hallucination": {
+        "r": -0.3212946233741931,
+        "p_value": 1.8051704264352053e-13,
+        "n": 500
+      },
+      "mean_hallucinated_objects": 0.798,
+      "mean_hallucinated_objects_ci": [
+        0.732,
+        0.862
+      ],
+      "hallucination_rate": 0.62,
+      "hallucination_rate_ci": [
+        0.576,
+        0.662
+      ],
+      "bleu4_quartiles": [
+        {
+          "bucket": "Q1",
+          "n": 125,
+          "bleu4_min": 4.410363736106612,
+          "bleu4_max": 9.980099403873663,
+          "bleu4_mean": 6.964674419126033,
+          "hallucination_rate": 0.768,
+          "hallucination_rate_ci_low": 0.6958,
+          "hallucination_rate_ci_high": 0.84,
+          "mean_hallucinated_objects": 1.064
+        },
+        {
+          "bucket": "Q2",
+          "n": 125,
+          "bleu4_min": 9.993744303650718,
+          "bleu4_max": 12.549310621989482,
+          "bleu4_mean": 11.212608976854405,
+          "hallucination_rate": 0.712,
+          "hallucination_rate_ci_low": 0.632,
+          "hallucination_rate_ci_high": 0.784,
+          "mean_hallucinated_objects": 0.912
+        },
+        {
+          "bucket": "Q3",
+          "n": 125,
+          "bleu4_min": 12.549310621989482,
+          "bleu4_max": 19.881768219176266,
+          "bleu4_mean": 15.3781722475446,
+          "hallucination_rate": 0.632,
+          "hallucination_rate_ci_low": 0.544,
+          "hallucination_rate_ci_high": 0.712,
+          "mean_hallucinated_objects": 0.776
+        },
+        {
+          "bucket": "Q4",
+          "n": 125,
+          "bleu4_min": 19.96019880774733,
+          "bleu4_max": 78.25422900366438,
+          "bleu4_mean": 31.205821705541098,
+          "hallucination_rate": 0.368,
+          "hallucination_rate_ci_low": 0.28,
+          "hallucination_rate_ci_high": 0.448,
+          "mean_hallucinated_objects": 0.44
+        }
+      ]
+    }
+  },
+  "attention": {
+    "model": "attention",
+    "analysis": {
+      "n": 500,
+      "spearman_bleu4_vs_n_hallucinated": {
+        "rho": -0.28377256831214603,
+        "p_value": 1.0278972919339706e-10,
+        "n": 500
+      },
+      "spearman_bleu2_vs_has_hallucination": {
+        "rho": -0.2491547800684606,
+        "p_value": 1.6363729945420248e-08,
+        "n": 500
+      },
+      "pearson_bleu4_vs_has_hallucination": {
+        "r": -0.234562344949739,
+        "p_value": 1.1202661345995113e-07,
+        "n": 500
+      },
+      "mean_hallucinated_objects": 0.502,
+      "mean_hallucinated_objects_ci": [
+        0.446,
+        0.564
+      ],
+      "hallucination_rate": 0.402,
+      "hallucination_rate_ci": [
+        0.358,
+        0.44404999999999994
+      ],
+      "bleu4_quartiles": [
+        {
+          "bucket": "Q1",
+          "n": 125,
+          "bleu4_min": 4.406306339938217,
+          "bleu4_max": 10.729256185679601,
+          "bleu4_mean": 7.813077627031506,
+          "hallucination_rate": 0.576,
+          "hallucination_rate_ci_low": 0.488,
+          "hallucination_rate_ci_high": 0.656,
+          "mean_hallucinated_objects": 0.84
+        },
+        {
+          "bucket": "Q2",
+          "n": 125,
+          "bleu4_min": 10.729256185679601,
+          "bleu4_max": 15.106876986783844,
+          "bleu4_mean": 12.761913819525692,
+          "hallucination_rate": 0.44,
+          "hallucination_rate_ci_low": 0.352,
+          "hallucination_rate_ci_high": 0.528,
+          "mean_hallucinated_objects": 0.512
+        },
+        {
+          "bucket": "Q3",
+          "n": 125,
+          "bleu4_min": 15.106876986783844,
+          "bleu4_max": 24.71244254525358,
+          "bleu4_mean": 19.898549482285546,
+          "hallucination_rate": 0.344,
+          "hallucination_rate_ci_low": 0.256,
+          "hallucination_rate_ci_high": 0.4241999999999998,
+          "mean_hallucinated_objects": 0.376
+        },
+        {
+          "bucket": "Q4",
+          "n": 125,
+          "bleu4_min": 24.808415001701817,
+          "bleu4_max": 79.74259693549222,
+          "bleu4_mean": 37.35767423555398,
+          "hallucination_rate": 0.248,
+          "hallucination_rate_ci_low": 0.1758,
+          "hallucination_rate_ci_high": 0.328,
+          "mean_hallucinated_objects": 0.28
+        }
+      ]
+    }
+  },
+  "object": {
+    "model": "object",
+    "analysis": {
+      "n": 500,
+      "spearman_bleu4_vs_n_hallucinated": {
+        "rho": -0.24941455261554693,
+        "p_value": 1.5795072027689722e-08,
+        "n": 500
+      },
+      "spearman_bleu2_vs_has_hallucination": {
+        "rho": -0.25507629913978874,
+        "p_value": 7.235052969439763e-09,
+        "n": 500
+      },
+      "pearson_bleu4_vs_has_hallucination": {
+        "r": -0.20593869742572524,
+        "p_value": 3.4294382412966367e-06,
+        "n": 500
+      },
+      "mean_hallucinated_objects": 0.338,
+      "mean_hallucinated_objects_ci": [
+        0.286,
+        0.392
+      ],
+      "hallucination_rate": 0.276,
+      "hallucination_rate_ci": [
+        0.236,
+        0.31204999999999994
+      ],
+      "bleu4_quartiles": [
+        {
+          "bucket": "Q1",
+          "n": 125,
+          "bleu4_min": 5.063996506781409,
+          "bleu4_max": 11.59119922599073,
+          "bleu4_mean": 8.482085629138416,
+          "hallucination_rate": 0.44,
+          "hallucination_rate_ci_low": 0.36,
+          "hallucination_rate_ci_high": 0.528,
+          "mean_hallucinated_objects": 0.592
+        },
+        {
+          "bucket": "Q2",
+          "n": 125,
+          "bleu4_min": 11.59119922599073,
+          "bleu4_max": 17.747405280050266,
+          "bleu4_mean": 13.961746624192532,
+          "hallucination_rate": 0.296,
+          "hallucination_rate_ci_low": 0.224,
+          "hallucination_rate_ci_high": 0.384,
+          "mean_hallucinated_objects": 0.32
+        },
+        {
+          "bucket": "Q3",
+          "n": 125,
+          "bleu4_min": 17.827531042796252,
+          "bleu4_max": 26.647313141084275,
+          "bleu4_mean": 21.926664651350954,
+          "hallucination_rate": 0.2,
+          "hallucination_rate_ci_low": 0.136,
+          "hallucination_rate_ci_high": 0.272,
+          "mean_hallucinated_objects": 0.232
+        },
+        {
+          "bucket": "Q4",
+          "n": 125,
+          "bleu4_min": 26.663544297126496,
+          "bleu4_max": 100.00000000000004,
+          "bleu4_mean": 39.589405749312014,
+          "hallucination_rate": 0.168,
+          "hallucination_rate_ci_low": 0.104,
+          "hallucination_rate_ci_high": 0.24,
+          "mean_hallucinated_objects": 0.208
+        }
+      ]
+    }
+  },
+  "pooled": {
+    "model": "pooled",
+    "analysis": {
+      "n": 1500,
+      "spearman_bleu4_vs_n_hallucinated": {
+        "rho": -0.327425468532541,
+        "p_value": 8.105743274883386e-39,
+        "n": 1500
+      },
+      "spearman_bleu2_vs_has_hallucination": {
+        "rho": -0.3100427800022906,
+        "p_value": 8.803036786486543e-35,
+        "n": 1500
+      },
+      "pearson_bleu4_vs_has_hallucination": {
+        "r": -0.28095302940254596,
+        "p_value": 1.3053344125422496e-28,
+        "n": 1500
+      },
+      "mean_hallucinated_objects": 0.546,
+      "mean_hallucinated_objects_ci": [
+        0.5093333333333333,
+        0.5806833333333333
+      ],
+      "hallucination_rate": 0.43266666666666664,
+      "hallucination_rate_ci": [
+        0.4079833333333333,
+        0.4573333333333333
+      ],
+      "bleu4_quartiles": [
+        {
+          "bucket": "Q1",
+          "n": 375,
+          "bleu4_min": 4.406306339938217,
+          "bleu4_max": 10.552670315936318,
+          "bleu4_mean": 7.690347981592313,
+          "hallucination_rate": 0.6266666666666667,
+          "hallucination_rate_ci_low": 0.5786,
+          "hallucination_rate_ci_high": 0.6693333333333333,
+          "mean_hallucinated_objects": 0.8746666666666667
+        },
+        {
+          "bucket": "Q2",
+          "n": 375,
+          "bleu4_min": 10.552670315936318,
+          "bleu4_max": 14.57516139687571,
+          "bleu4_mean": 12.380187580000417,
+          "hallucination_rate": 0.5173333333333333,
+          "hallucination_rate_ci_low": 0.4666666666666667,
+          "hallucination_rate_ci_high": 0.568,
+          "mean_hallucinated_objects": 0.6266666666666667
+        },
+        {
+          "bucket": "Q3",
+          "n": 375,
+          "bleu4_min": 14.57516139687571,
+          "bleu4_max": 24.08856270485351,
+          "bleu4_mean": 19.06713735001976,
+          "hallucination_rate": 0.3466666666666667,
+          "hallucination_rate_ci_low": 0.3012666666666667,
+          "hallucination_rate_ci_high": 0.3973333333333333,
+          "mean_hallucinated_objects": 0.4
+        },
+        {
+          "bucket": "Q4",
+          "n": 375,
+          "bleu4_min": 24.08856270485351,
+          "bleu4_max": 100.00000000000004,
+          "bleu4_mean": 36.379792144206434,
+          "hallucination_rate": 0.24,
+          "hallucination_rate_ci_low": 0.19466666666666665,
+          "hallucination_rate_ci_high": 0.2826666666666667,
+          "mean_hallucinated_objects": 0.2826666666666667
+        }
+      ]
+    }
+  }
+}

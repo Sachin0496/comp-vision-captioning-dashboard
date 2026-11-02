@@ -1,0 +1,24 @@
+.venv/
+.cache/
+.uv-cache/
+__pycache__/
+*.pyc
+data/raw/
+data/processed/
+outputs/checkpoints/
+logs/
+.DS_Store
+
+# Unrelated project living in this folder
+Campus_Find/
+report/shadowfind/
+
+# Duplicate build outputs: canonical copies live at report/ and dashboard/
+report/mad_format/MAD_Report_Image_Captioning.docx
+report/mad_format/MAD_Report_Image_Captioning.pdf
+report/mad_format/figures/attention_maps.png
+report/mad_format/figures/bleu_vs_hallucination.png
+report/mad_format/figures/model_comparison.png
+report/mad_format/figures/qualitative_examples.png
+report/report.docx
+report/report.html

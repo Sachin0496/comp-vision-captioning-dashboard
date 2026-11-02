@@ -1,0 +1,212 @@
+[
+  {
+    "bleu_bin": [
+      0,
+      10
+    ],
+    "model": "global",
+    "n": 127,
+    "mean_sentence_bleu4": 7.012376307071305,
+    "hallucination_rate": 0.7716535433070866,
+    "hallucination_rate_ci": [
+      0.6929133858267716,
+      0.84251968503937
+    ]
+  },
+  {
+    "bleu_bin": [
+      0,
+      10
+    ],
+    "model": "attention",
+    "n": 108,
+    "mean_sentence_bleu4": 7.388407702540972,
+    "hallucination_rate": 0.5740740740740741,
+    "hallucination_rate_ci": [
+      0.4722222222222222,
+      0.6666666666666666
+    ]
+  },
+  {
+    "bleu_bin": [
+      0,
+      10
+    ],
+    "model": "object",
+    "n": 80,
+    "mean_sentence_bleu4": 7.166916611236042,
+    "hallucination_rate": 0.4375,
+    "hallucination_rate_ci": [
+      0.325,
+      0.5375
+    ]
+  },
+  {
+    "bleu_bin": [
+      10,
+      20
+    ],
+    "model": "global",
+    "n": 251,
+    "mean_sentence_bleu4": 13.40143089647052,
+    "hallucination_rate": 0.6613545816733067,
+    "hallucination_rate_ci": [
+      0.6055776892430279,
+      0.7211155378486056
+    ]
+  },
+  {
+    "bleu_bin": [
+      10,
+      20
+    ],
+    "model": "attention",
+    "n": 209,
+    "mean_sentence_bleu4": 14.214202202109446,
+    "hallucination_rate": 0.430622009569378,
+    "hallucination_rate_ci": [
+      0.36363636363636365,
+      0.5025119617224879
+    ]
+  },
+  {
+    "bleu_bin": [
+      10,
+      20
+    ],
+    "model": "object",
+    "n": 206,
+    "mean_sentence_bleu4": 14.15382506438573,
+    "hallucination_rate": 0.32524271844660196,
+    "hallucination_rate_ci": [
+      0.2620145631067961,
+      0.3883495145631068
+    ]
+  },
+  {
+    "bleu_bin": [
+      20,
+      30
+    ],
+    "model": "global",
+    "n": 76,
+    "mean_sentence_bleu4": 24.36591142568278,
+    "hallucination_rate": 0.4473684210526316,
+    "hallucination_rate_ci": [
+      0.34210526315789475,
+      0.5657894736842105
+    ]
+  },
+  {
+    "bleu_bin": [
+      20,
+      30
+    ],
+    "model": "attention",
+    "n": 105,
+    "mean_sentence_bleu4": 24.453593197488313,
+    "hallucination_rate": 0.3047619047619048,
+    "hallucination_rate_ci": [
+      0.21904761904761905,
+      0.3904761904761905
+    ]
+  },
+  {
+    "bleu_bin": [
+      20,
+      30
+    ],
+    "model": "object",
+    "n": 127,
+    "mean_sentence_bleu4": 24.664142372994576,
+    "hallucination_rate": 0.1732283464566929,
+    "hallucination_rate_ci": [
+      0.11023622047244094,
+      0.23641732283464548
+    ]
+  },
+  {
+    "bleu_bin": [
+      30,
+      40
+    ],
+    "model": "global",
+    "n": 26,
+    "mean_sentence_bleu4": 34.662881824607034,
+    "hallucination_rate": 0.34615384615384615,
+    "hallucination_rate_ci": [
+      0.15384615384615385,
+      0.5384615384615384
+    ]
+  },
+  {
+    "bleu_bin": [
+      30,
+      40
+    ],
+    "model": "attention",
+    "n": 45,
+    "mean_sentence_bleu4": 34.13341334797805,
+    "hallucination_rate": 0.28888888888888886,
+    "hallucination_rate_ci": [
+      0.17777777777777778,
+      0.4222222222222222
+    ]
+  },
+  {
+    "bleu_bin": [
+      30,
+      40
+    ],
+    "model": "object",
+    "n": 38,
+    "mean_sentence_bleu4": 34.99682212714603,
+    "hallucination_rate": 0.21052631578947367,
+    "hallucination_rate_ci": [
+      0.10526315789473684,
+      0.34210526315789475
+    ]
+  },
+  {
+    "bleu_bin": [
+      40,
+      101
+    ],
+    "model": "global",
+    "n": 20,
+    "mean_sentence_bleu4": 54.38922634147184,
+    "hallucination_rate": 0.15,
+    "hallucination_rate_ci": [
+      0.0,
+      0.3
+    ]
+  },
+  {
+    "bleu_bin": [
+      40,
+      101
+    ],
+    "model": "attention",
+    "n": 33,
+    "mean_sentence_bleu4": 56.25923384966684,
+    "hallucination_rate": 0.12121212121212122,
+    "hallucination_rate_ci": [
+      0.030303030303030304,
+      0.24242424242424243
+    ]
+  },
+  {
+    "bleu_bin": [
+      40,
+      101
+    ],
+    "model": "object",
+    "n": 49,
+    "mean_sentence_bleu4": 51.91267790581708,
+    "hallucination_rate": 0.12244897959183673,
+    "hallucination_rate_ci": [
+      0.04081632653061224,
+      0.22448979591836735
+    ]
+  }
+]

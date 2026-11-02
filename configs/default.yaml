@@ -1,0 +1,51 @@
+seed: 42
+
+data:
+  raw_images: data/raw/val2017
+  annotations: data/raw/annotations
+  processed: data/processed
+  splits: [4000, 500, 500]
+  min_word_freq: 3
+  max_caption_len: 22
+  image_size: 224
+
+features:
+  backbone: resnet18
+  batch_size: 32
+  workers: 0
+
+detector:
+  score_thresh: 0.30
+  max_detections: 12
+  batch_size: 4
+  max_side: 640
+
+model:
+  embed_dim: 256
+  hidden_dim: 512
+  attn_dim: 512
+  dropout: 0.3
+  obj_dim: 128
+
+train:
+  batch_size: 96
+  epochs: 12
+  lr: 0.001
+  weight_decay: 0.0001
+  grad_clip: 5.0
+  label_smoothing: 0.05
+  num_workers: 0
+  patience: 4
+  val_every: 1
+  samples_per_epoch: 8000
+  val_captions_per_image: 1
+
+eval:
+  split: test
+  max_len: 22
+  bootstrap: 1000
+
+runtime:
+  device: auto
+  mps_memory_fraction: 0.55
+  torch_threads: 6

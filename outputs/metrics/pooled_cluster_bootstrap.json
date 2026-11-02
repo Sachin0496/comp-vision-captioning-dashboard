@@ -1,0 +1,20 @@
+{
+  "bleu4_vs_n_hallucinated": {
+    "rho": -0.327425468532541,
+    "ci_low": -0.3862945575631079,
+    "ci_high": -0.2678768449774888,
+    "p_two_sided": 0.0,
+    "n_boot": 1000,
+    "n_images": 500,
+    "n_captions": 1500
+  },
+  "bleu2_vs_has_hallucination": {
+    "rho": -0.3105779940988639,
+    "ci_low": -0.36589030225771274,
+    "ci_high": -0.25380201735970837,
+    "p_two_sided": 0.0,
+    "n_boot": 1000,
+    "n_images": 500,
+    "n_captions": 1500
+  }
+}

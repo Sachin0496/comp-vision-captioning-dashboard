@@ -1,0 +1,16 @@
+# Core runtime
+torch>=2.14.0
+torchvision>=0.29.0
+numpy>=2.0
+Pillow>=11.0
+PyYAML>=6.0
+tqdm>=4.66
+
+# Metrics and figures
+matplotlib>=3.9
+scipy>=1.13
+sacrebleu>=2.4
+nltk>=3.9
+
+# COCO tooling (optional at training time, used for data validation)
+pycocotools>=2.0.8

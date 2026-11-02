@@ -1,0 +1,54 @@
+
+@page {
+  size: Letter;
+  margin: 16mm 17mm 18mm 17mm;
+}
+html { font-size: 10.2pt; }
+body {
+  font-family: "Charter", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  color: #1b1b1b;
+  line-height: 1.42;
+  max-width: none;
+  margin: 0;
+}
+header#title-block-header {
+  text-align: center;
+  margin: 32mm 0 18mm 0;
+  page-break-after: always;
+}
+h1.title { font-size: 23pt; line-height: 1.15; margin: 0 0 6mm 0; color: #17324d; }
+p.subtitle { font-size: 13.5pt; font-style: italic; color: #40566b; margin: 0 0 10mm 0; }
+p.author { font-size: 11.5pt; margin: 0; }
+p.date { font-size: 10.5pt; color: #666; }
+h1 { font-size: 17pt; color: #17324d; margin-top: 1.4em; page-break-after: avoid; }
+h2 { font-size: 13pt; color: #23435f; margin-top: 1.2em; page-break-after: avoid; }
+h3 { font-size: 11pt; color: #23435f; page-break-after: avoid; }
+p { margin: 0 0 0.65em 0; text-align: justify; hyphens: auto; }
+ul, ol { margin: 0.2em 0 0.7em 1.2em; }
+li { margin: 0.15em 0; }
+figure { margin: 10pt 0 12pt 0; page-break-inside: avoid; }
+figure img { max-width: 100%; max-height: 222mm; width: auto; height: auto; display: block; margin: 0 auto; }
+figcaption { font-size: 8.6pt; color: #555; margin-top: 4pt; text-align: center; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.0pt;
+  line-height: 1.25;
+  margin: 6pt 0 12pt 0;
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th {
+  background: #eef2f6;
+  border-top: 0.8pt solid #8a9bab;
+  border-bottom: 0.6pt solid #8a9bab;
+  padding: 3.5pt 4pt;
+  text-align: left;
+  font-weight: 600;
+}
+td { border-bottom: 0.4pt solid #d8dee4; padding: 3pt 4pt; vertical-align: top; }
+code { font-family: "SFMono-Regular", Menlo, monospace; font-size: 8.4pt; background: #f3f4f6; padding: 0 2pt; }
+strong { color: #102538; }
+a { color: #1f5a86; text-decoration: none; }
+hr { border: none; border-top: 0.5pt solid #ccd4dc; margin: 12pt 0; }

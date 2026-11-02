@@ -1,0 +1,1793 @@
+{
+  "meta": {
+    "title": "Do Better Captions Hallucinate Less?",
+    "subtitle": "Measuring Object Hallucination in CNN-LSTM Image Captioning with and without Attention",
+    "generated_at": "2026-11-02T04:17:33+00:00",
+    "split": "test",
+    "split_note": "500 held-out COCO val2017 images, never seen during training or model selection; each image has about 5 reference captions.",
+    "n_test": 500,
+    "n_train": 4000,
+    "n_val": 500,
+    "n_total": 5000,
+    "vocab_size": 2916,
+    "train_captions": 20010,
+    "test_captions": 2501,
+    "seed": 42,
+    "device_note": "Apple M4 / 16 GB: CPU for LSTM training, MPS for feature and detector extraction (MPS memory fraction 0.55).",
+    "dataset_note": "COCO val2017 images re-split deterministically into 4,000/500/500 (train/val/test); the vocabulary is built from training captions only."
+  },
+  "headline": {
+    "question": "Do better captions hallucinate less?",
+    "answer": "On 500 held-out COCO images the object-aware model has the best BLEU-4 (18.03) and the lowest CHAIRs (23.64%), 25.68 percentage points below the global model's 49.32%. Across 1,500 pooled captions, higher sentence BLEU-4 is associated with fewer hallucinated objects (Spearman ρ = -0.327; image-cluster bootstrap 95% CI -0.386 to -0.268). At matched BLEU-4 in the 10-20 bin the models still range from 32.5% to 66.1% hallucinated object mentions, so BLEU overlap alone does not identify a grounded captioner.",
+    "best_model": "object",
+    "best_bleu4": 18.03,
+    "best_chair_s": 23.64,
+    "pooled_rho": -0.327,
+    "pooled_p": 8.11e-39,
+    "cluster_rho": -0.327,
+    "cluster_ci": [
+      -0.386,
+      -0.268
+    ],
+    "cluster_p": 0.0,
+    "matched_bin": "10-20",
+    "matched_rates": {
+      "global": 66.14,
+      "attention": 43.06,
+      "object": 32.52
+    },
+    "hallucination_reduction_pp": 25.68,
+    "bleu_gain_points": 6.08
+  },
+  "tasks": [
+    {
+      "id": "dataset",
+      "label": "Dataset with captions + object annotations",
+      "description": "COCO val2017 images re-split into train/val/test with a fixed seed; captions tokenised into a training-only vocabulary and per-image ground-truth object classes extracted from the COCO annotations.",
+      "status": "complete",
+      "metric": "5,000 images · 80 classes · 25,014 captions",
+      "evidence": [
+        {
+          "label": "download",
+          "path": "../scripts/00_download_data.sh"
+        },
+        {
+          "label": "prepare data",
+          "path": "../scripts/01_prepare_data.py"
+        },
+        {
+          "label": "stats",
+          "path": "../data/processed/stats.json"
+        },
+        {
+          "label": "captions",
+          "path": "../data/processed/captions.json"
+        },
+        {
+          "label": "object annotations",
+          "path": "../data/processed/objects_gt.json"
+        },
+        {
+          "label": "categories",
+          "path": "../data/processed/categories.json"
+        }
+      ]
+    },
+    {
+      "id": "global",
+      "label": "CNN-LSTM captioner without attention",
+      "description": "ResNet-18 features are pooled to one vector that initialises an LSTM decoder; the model has no spatial access and serves as the baseline for both caption quality and hallucination.",
+      "status": "complete",
+      "metric": "BLEU-4 11.94 · CIDEr-D 0.485 · CHAIRs 49.32%",
+      "evidence": [
+        {
+          "label": "train",
+          "path": "../scripts/04_train.py"
+        },
+        {
+          "label": "training history",
+          "path": "../outputs/checkpoints/global/history.json"
+        },
+        {
+          "label": "test metrics",
+          "path": "../outputs/metrics/global_test.json"
+        },
+        {
+          "label": "predictions",
+          "path": "../outputs/predictions/global_test.json"
+        }
+      ]
+    },
+    {
+      "id": "attention",
+      "label": "CNN-LSTM with Bahdanau attention",
+      "description": "The same backbone and decoder, but each decoding step attends over the 7x7 spatial grid, letting nouns focus on image regions.",
+      "status": "complete",
+      "metric": "BLEU-4 16.32 · CIDEr-D 0.704 · CHAIRs 34.01%",
+      "evidence": [
+        {
+          "label": "train",
+          "path": "../scripts/04_train.py"
+        },
+        {
+          "label": "training history",
+          "path": "../outputs/checkpoints/attention/history.json"
+        },
+        {
+          "label": "test metrics",
+          "path": "../outputs/metrics/attention_test.json"
+        },
+        {
+          "label": "predictions with attention",
+          "path": "../outputs/predictions/attention_test.json"
+        }
+      ]
+    },
+    {
+      "id": "object",
+      "label": "Object-label variant",
+      "description": "Attention plus score-weighted embeddings of the detected object labels (Faster R-CNN, threshold 0.3, at most 12 boxes), giving the decoder grounded object vocabulary at every step.",
+      "status": "complete",
+      "metric": "BLEU-4 18.03 · CIDEr-D 0.815 · CHAIRs 23.64%",
+      "evidence": [
+        {
+          "label": "detector",
+          "path": "../scripts/03_detect_objects.py"
+        },
+        {
+          "label": "train",
+          "path": "../scripts/04_train.py"
+        },
+        {
+          "label": "training history",
+          "path": "../outputs/checkpoints/object/history.json"
+        },
+        {
+          "label": "test metrics",
+          "path": "../outputs/metrics/object_test.json"
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "label": "BLEU-1-4 and CIDEr-D evaluation",
+      "description": "Corpus-level BLEU-1-4 and CIDEr-D on the 500-image test split, with 1,000-sample bootstrap confidence intervals for paired differences.",
+      "status": "complete",
+      "metric": "best BLEU-4 18.03 · best CIDEr-D 0.815 (object-aware)",
+      "evidence": [
+        {
+          "label": "evaluate",
+          "path": "../scripts/05_evaluate.py"
+        },
+        {
+          "label": "comparison table",
+          "path": "../outputs/metrics/model_comparison.json"
+        },
+        {
+          "label": "comparison CSV",
+          "path": "../outputs/metrics/model_comparison.csv"
+        },
+        {
+          "label": "comparison figure",
+          "path": "../report/figures/model_comparison.png"
+        }
+      ]
+    },
+    {
+      "id": "chair",
+      "label": "CHAIR hallucination measurement",
+      "description": "Every generated caption is mined for COCO object mentions and matched against the image's ground-truth objects; CHAIRs is the share of mentioned objects that are absent.",
+      "status": "complete",
+      "metric": "CHAIRs 49.32% to 23.64% · 25.68 pp reduction",
+      "evidence": [
+        {
+          "label": "hallucination logic",
+          "path": "../src/hallucination.py"
+        },
+        {
+          "label": "global metrics",
+          "path": "../outputs/metrics/global_test.json"
+        },
+        {
+          "label": "object metrics",
+          "path": "../outputs/metrics/object_test.json"
+        },
+        {
+          "label": "correlation analysis",
+          "path": "../outputs/metrics/correlation.json"
+        }
+      ]
+    },
+    {
+      "id": "attention_viz",
+      "label": "Attention-map visualisation",
+      "description": "Per-word 7x7 attention grids are normalised robustly and blended over the original image so the decoder's focus can be inspected.",
+      "status": "complete",
+      "metric": "4 attention examples · 10 word overlays",
+      "evidence": [
+        {
+          "label": "visualise",
+          "path": "../scripts/06_visualize.py"
+        },
+        {
+          "label": "attention grid figure",
+          "path": "../report/figures/attention_maps.png"
+        },
+        {
+          "label": "attention predictions",
+          "path": "../outputs/predictions/attention_test.json"
+        },
+        {
+          "label": "rendered overlays",
+          "path": "assets/attention"
+        }
+      ]
+    },
+    {
+      "id": "analysis",
+      "label": "BLEU ↔ hallucination analysis and final report",
+      "description": "Caption-level Spearman correlations, BLEU-4 quartiles, an image-cluster bootstrap and a matched-BLEU comparison test whether higher overlap implies fewer hallucinations; the findings are written up in the MAD-format report.",
+      "status": "complete",
+      "metric": "pooled rho = -0.327 · 33.6 pp matched-BLEU spread · 31-page report",
+      "evidence": [
+        {
+          "label": "matched-BLEU analysis",
+          "path": "../outputs/metrics/bleu_matched_analysis.json"
+        },
+        {
+          "label": "cluster bootstrap",
+          "path": "../outputs/metrics/pooled_cluster_bootstrap.json"
+        },
+        {
+          "label": "scatter figure",
+          "path": "../report/figures/bleu_vs_hallucination.png"
+        },
+        {
+          "label": "make report",
+          "path": "../scripts/07_make_report.py"
+        },
+        {
+          "label": "report DOCX",
+          "path": "assets/downloads/MAD_Report_Image_Captioning.docx"
+        },
+        {
+          "label": "report PDF",
+          "path": "assets/downloads/MAD_Report_Image_Captioning.pdf"
+        }
+      ]
+    }
+  ],
+  "pipeline": [
+    {
+      "id": "data",
+      "label": "Dataset",
+      "detail": "Download COCO val2017 images and annotations, re-split 4,000/500/500, build the training-only vocabulary and extract ground-truth objects.",
+      "status": "complete",
+      "runtime": "5,000 images",
+      "file": "../scripts/01_prepare_data.py"
+    },
+    {
+      "id": "features",
+      "label": "CNN features",
+      "detail": "ResNet-18 (ImageNet) layer4 activations cached once and reused by all three captioners: a pooled vector and a 7x7 spatial grid.",
+      "status": "complete",
+      "runtime": "60.2 s",
+      "file": "../scripts/02_extract_features.py"
+    },
+    {
+      "id": "detector",
+      "label": "Object detector",
+      "detail": "fasterrcnn_mobilenet_v3_large_320_fpn at score threshold 0.3, at most 12 boxes per image, feeding the object-aware variant.",
+      "status": "complete",
+      "runtime": "13.0 min",
+      "file": "../scripts/03_detect_objects.py"
+    },
+    {
+      "id": "training",
+      "label": "Training",
+      "detail": "AdamW with OneCycle over 12 epochs and 8,000 sampled caption pairs per epoch on CPU; the best validation-loss checkpoint is kept.",
+      "status": "complete",
+      "runtime": "6.9 / 16.3 / 10.9 min",
+      "file": "../scripts/04_train.py"
+    },
+    {
+      "id": "evaluation",
+      "label": "Evaluation",
+      "detail": "Greedy decoding of 500 test images and corpus-level BLEU-1-4, CIDEr-D, CHAIR and object precision/recall/F1.",
+      "status": "complete",
+      "runtime": "< 10 s",
+      "file": "../scripts/05_evaluate.py"
+    },
+    {
+      "id": "report",
+      "label": "Figures and report",
+      "detail": "Report figures from scripts/06_visualize.py, then the MAD-format DOCX/PDF report from scripts/07_make_report.py.",
+      "status": "complete",
+      "runtime": "31 pages",
+      "file": "../scripts/07_make_report.py"
+    }
+  ],
+  "models": [
+    {
+      "id": "global",
+      "label": "Global CNN-LSTM",
+      "short": "Global",
+      "color": "#4C72B0",
+      "description": "A single pooled image vector initialises the LSTM; no spatial access.",
+      "params": 4344676,
+      "params_label": "4.34 M",
+      "train_minutes": 6.9,
+      "bleu1": 56.84,
+      "bleu2": 35.74,
+      "bleu3": 20.65,
+      "bleu4": 11.94,
+      "bleu": 11.94,
+      "cider_d": 0.485,
+      "chair_s": 49.32,
+      "chair_i": 62.0,
+      "object_precision": 50.68,
+      "object_recall": 30.04,
+      "object_f1": 37.72,
+      "n_mentions": 809,
+      "n_hallucinated": 399,
+      "sentence_bleu4_mean": 16.19,
+      "unique_captions": 239,
+      "uses_attention": false,
+      "uses_objects": false
+    },
+    {
+      "id": "attention",
+      "label": "CNN-LSTM + Bahdanau Attention",
+      "short": "Attention",
+      "color": "#DD8452",
+      "description": "Bahdanau attention over a 7x7 spatial grid at every decoding step.",
+      "params": 5919077,
+      "params_label": "5.92 M",
+      "train_minutes": 16.3,
+      "bleu1": 59.75,
+      "bleu2": 40.59,
+      "bleu3": 26.09,
+      "bleu4": 16.32,
+      "bleu": 16.32,
+      "cider_d": 0.704,
+      "chair_s": 34.01,
+      "chair_i": 40.2,
+      "object_precision": 65.99,
+      "object_recall": 35.68,
+      "object_f1": 46.31,
+      "n_mentions": 738,
+      "n_hallucinated": 251,
+      "sentence_bleu4_mean": 19.46,
+      "unique_captions": 420,
+      "uses_attention": true,
+      "uses_objects": false
+    },
+    {
+      "id": "object",
+      "label": "Object-aware Attention",
+      "short": "Object-aware",
+      "color": "#55A868",
+      "description": "Attention plus score-weighted detected object-label embeddings.",
+      "params": 6191589,
+      "params_label": "6.19 M",
+      "train_minutes": 10.9,
+      "bleu1": 61.96,
+      "bleu2": 43.35,
+      "bleu3": 28.44,
+      "bleu4": 18.03,
+      "bleu": 18.03,
+      "cider_d": 0.815,
+      "chair_s": 23.64,
+      "chair_i": 27.6,
+      "object_precision": 76.36,
+      "object_recall": 40.0,
+      "object_f1": 52.5,
+      "n_mentions": 715,
+      "n_hallucinated": 169,
+      "sentence_bleu4_mean": 20.99,
+      "unique_captions": 411,
+      "uses_attention": true,
+      "uses_objects": true
+    }
+  ],
+  "pairwise": [
+    {
+      "id": "global_vs_attention",
+      "first": "global",
+      "second": "attention",
+      "label": "Global vs Attention",
+      "objects_diff": 0.296,
+      "objects_ci": [
+        0.226,
+        0.368
+      ],
+      "objects_p": 0.0,
+      "rate_diff_pp": 21.8,
+      "rate_ci_pp": [
+        17.0,
+        26.8
+      ],
+      "bleu4_diff": -3.267,
+      "bleu4_ci": [
+        -4.184,
+        -2.411
+      ],
+      "mcnemar_p": 8.43e-16,
+      "only_first": 150,
+      "only_second": 41
+    },
+    {
+      "id": "global_vs_object",
+      "first": "global",
+      "second": "object",
+      "label": "Global vs Object-aware",
+      "objects_diff": 0.46,
+      "objects_ci": [
+        0.394,
+        0.532
+      ],
+      "objects_p": 0.0,
+      "rate_diff_pp": 34.4,
+      "rate_ci_pp": [
+        29.6,
+        39.0
+      ],
+      "bleu4_diff": -4.8,
+      "bleu4_ci": [
+        -5.713,
+        -3.847
+      ],
+      "mcnemar_p": 2.45e-34,
+      "only_first": 197,
+      "only_second": 25
+    },
+    {
+      "id": "attention_vs_object",
+      "first": "attention",
+      "second": "object",
+      "label": "Attention vs Object-aware",
+      "objects_diff": 0.164,
+      "objects_ci": [
+        0.11,
+        0.22
+      ],
+      "objects_p": 0.0,
+      "rate_diff_pp": 12.6,
+      "rate_ci_pp": [
+        8.2,
+        17.0
+      ],
+      "bleu4_diff": -1.532,
+      "bleu4_ci": [
+        -2.473,
+        -0.603
+      ],
+      "mcnemar_p": 8.82e-08,
+      "only_first": 101,
+      "only_second": 38
+    }
+  ],
+  "correlations": {
+    "global": {
+      "n": 500,
+      "rho": -0.326,
+      "p": 7.91e-14,
+      "rate": 62.0
+    },
+    "attention": {
+      "n": 500,
+      "rho": -0.284,
+      "p": 1.03e-10,
+      "rate": 40.2
+    },
+    "object": {
+      "n": 500,
+      "rho": -0.249,
+      "p": 1.58e-08,
+      "rate": 27.6
+    },
+    "pooled": {
+      "n": 1500,
+      "rho": -0.327,
+      "p": 8.11e-39,
+      "rate": 43.27
+    }
+  },
+  "quartiles": [
+    {
+      "bucket": "Q1",
+      "n": 375,
+      "bleu_min": 4.41,
+      "bleu_max": 10.55,
+      "bleu_mean": 7.69,
+      "rate": 62.67,
+      "ci": [
+        57.86,
+        66.93
+      ],
+      "mean_hallucinated": 0.87
+    },
+    {
+      "bucket": "Q2",
+      "n": 375,
+      "bleu_min": 10.55,
+      "bleu_max": 14.58,
+      "bleu_mean": 12.38,
+      "rate": 51.73,
+      "ci": [
+        46.67,
+        56.8
+      ],
+      "mean_hallucinated": 0.63
+    },
+    {
+      "bucket": "Q3",
+      "n": 375,
+      "bleu_min": 14.58,
+      "bleu_max": 24.09,
+      "bleu_mean": 19.07,
+      "rate": 34.67,
+      "ci": [
+        30.13,
+        39.73
+      ],
+      "mean_hallucinated": 0.4
+    },
+    {
+      "bucket": "Q4",
+      "n": 375,
+      "bleu_min": 24.09,
+      "bleu_max": 100.0,
+      "bleu_mean": 36.38,
+      "rate": 24.0,
+      "ci": [
+        19.47,
+        28.27
+      ],
+      "mean_hallucinated": 0.28
+    }
+  ],
+  "matched_bleu": [
+    {
+      "bin": "0-10",
+      "model": "global",
+      "n": 127,
+      "mean_bleu4": 7.01,
+      "rate": 77.17,
+      "ci": [
+        69.29,
+        84.25
+      ]
+    },
+    {
+      "bin": "0-10",
+      "model": "attention",
+      "n": 108,
+      "mean_bleu4": 7.39,
+      "rate": 57.41,
+      "ci": [
+        47.22,
+        66.67
+      ]
+    },
+    {
+      "bin": "0-10",
+      "model": "object",
+      "n": 80,
+      "mean_bleu4": 7.17,
+      "rate": 43.75,
+      "ci": [
+        32.5,
+        53.75
+      ]
+    },
+    {
+      "bin": "10-20",
+      "model": "global",
+      "n": 251,
+      "mean_bleu4": 13.4,
+      "rate": 66.14,
+      "ci": [
+        60.56,
+        72.11
+      ]
+    },
+    {
+      "bin": "10-20",
+      "model": "attention",
+      "n": 209,
+      "mean_bleu4": 14.21,
+      "rate": 43.06,
+      "ci": [
+        36.36,
+        50.25
+      ]
+    },
+    {
+      "bin": "10-20",
+      "model": "object",
+      "n": 206,
+      "mean_bleu4": 14.15,
+      "rate": 32.52,
+      "ci": [
+        26.2,
+        38.83
+      ]
+    },
+    {
+      "bin": "20-30",
+      "model": "global",
+      "n": 76,
+      "mean_bleu4": 24.37,
+      "rate": 44.74,
+      "ci": [
+        34.21,
+        56.58
+      ]
+    },
+    {
+      "bin": "20-30",
+      "model": "attention",
+      "n": 105,
+      "mean_bleu4": 24.45,
+      "rate": 30.48,
+      "ci": [
+        21.9,
+        39.05
+      ]
+    },
+    {
+      "bin": "20-30",
+      "model": "object",
+      "n": 127,
+      "mean_bleu4": 24.66,
+      "rate": 17.32,
+      "ci": [
+        11.02,
+        23.64
+      ]
+    },
+    {
+      "bin": "30-40",
+      "model": "global",
+      "n": 26,
+      "mean_bleu4": 34.66,
+      "rate": 34.62,
+      "ci": [
+        15.38,
+        53.85
+      ]
+    },
+    {
+      "bin": "30-40",
+      "model": "attention",
+      "n": 45,
+      "mean_bleu4": 34.13,
+      "rate": 28.89,
+      "ci": [
+        17.78,
+        42.22
+      ]
+    },
+    {
+      "bin": "30-40",
+      "model": "object",
+      "n": 38,
+      "mean_bleu4": 35.0,
+      "rate": 21.05,
+      "ci": [
+        10.53,
+        34.21
+      ]
+    },
+    {
+      "bin": "40+",
+      "model": "global",
+      "n": 20,
+      "mean_bleu4": 54.39,
+      "rate": 15.0,
+      "ci": [
+        0.0,
+        30.0
+      ]
+    },
+    {
+      "bin": "40+",
+      "model": "attention",
+      "n": 33,
+      "mean_bleu4": 56.26,
+      "rate": 12.12,
+      "ci": [
+        3.03,
+        24.24
+      ]
+    },
+    {
+      "bin": "40+",
+      "model": "object",
+      "n": 49,
+      "mean_bleu4": 51.91,
+      "rate": 12.24,
+      "ci": [
+        4.08,
+        22.45
+      ]
+    }
+  ],
+  "training": {
+    "global": [
+      {
+        "epoch": 1,
+        "train_loss": 6.023,
+        "val_loss": 4.519,
+        "val_chair_s": 68.0,
+        "val_bleu4": 0.017
+      },
+      {
+        "epoch": 2,
+        "train_loss": 4.451,
+        "val_loss": 4.034,
+        "val_chair_s": 58.22,
+        "val_bleu4": 0.182
+      },
+      {
+        "epoch": 3,
+        "train_loss": 4.1,
+        "val_loss": 3.765,
+        "val_chair_s": 68.23,
+        "val_bleu4": 1.075
+      },
+      {
+        "epoch": 4,
+        "train_loss": 3.848,
+        "val_loss": 3.589,
+        "val_chair_s": 55.1,
+        "val_bleu4": 1.731
+      },
+      {
+        "epoch": 5,
+        "train_loss": 3.674,
+        "val_loss": 3.463,
+        "val_chair_s": 58.96,
+        "val_bleu4": 2.775
+      },
+      {
+        "epoch": 6,
+        "train_loss": 3.569,
+        "val_loss": 3.389,
+        "val_chair_s": 52.88,
+        "val_bleu4": 2.983
+      },
+      {
+        "epoch": 7,
+        "train_loss": 3.467,
+        "val_loss": 3.338,
+        "val_chair_s": 50.0,
+        "val_bleu4": 2.924
+      },
+      {
+        "epoch": 8,
+        "train_loss": 3.413,
+        "val_loss": 3.305,
+        "val_chair_s": 48.45,
+        "val_bleu4": 3.788
+      },
+      {
+        "epoch": 9,
+        "train_loss": 3.359,
+        "val_loss": 3.277,
+        "val_chair_s": 49.28,
+        "val_bleu4": 4.593
+      },
+      {
+        "epoch": 10,
+        "train_loss": 3.325,
+        "val_loss": 3.264,
+        "val_chair_s": 48.97,
+        "val_bleu4": 4.688
+      },
+      {
+        "epoch": 11,
+        "train_loss": 3.31,
+        "val_loss": 3.26,
+        "val_chair_s": 47.29,
+        "val_bleu4": 4.36
+      },
+      {
+        "epoch": 12,
+        "train_loss": 3.314,
+        "val_loss": 3.259,
+        "val_chair_s": 47.87,
+        "val_bleu4": 4.262
+      }
+    ],
+    "attention": [
+      {
+        "epoch": 1,
+        "train_loss": 5.819,
+        "val_loss": 4.638,
+        "val_chair_s": 54.89,
+        "val_bleu4": 0.082
+      },
+      {
+        "epoch": 2,
+        "train_loss": 4.454,
+        "val_loss": 3.936,
+        "val_chair_s": 54.23,
+        "val_bleu4": 1.709
+      },
+      {
+        "epoch": 3,
+        "train_loss": 3.952,
+        "val_loss": 3.618,
+        "val_chair_s": 42.44,
+        "val_bleu4": 3.82
+      },
+      {
+        "epoch": 4,
+        "train_loss": 3.716,
+        "val_loss": 3.464,
+        "val_chair_s": 42.97,
+        "val_bleu4": 4.152
+      },
+      {
+        "epoch": 5,
+        "train_loss": 3.541,
+        "val_loss": 3.378,
+        "val_chair_s": 36.69,
+        "val_bleu4": 4.754
+      },
+      {
+        "epoch": 6,
+        "train_loss": 3.438,
+        "val_loss": 3.307,
+        "val_chair_s": 34.79,
+        "val_bleu4": 5.442
+      },
+      {
+        "epoch": 7,
+        "train_loss": 3.352,
+        "val_loss": 3.264,
+        "val_chair_s": 37.06,
+        "val_bleu4": 6.098
+      },
+      {
+        "epoch": 8,
+        "train_loss": 3.296,
+        "val_loss": 3.235,
+        "val_chair_s": 34.31,
+        "val_bleu4": 5.704
+      },
+      {
+        "epoch": 9,
+        "train_loss": 3.245,
+        "val_loss": 3.221,
+        "val_chair_s": 33.14,
+        "val_bleu4": 6.191
+      },
+      {
+        "epoch": 10,
+        "train_loss": 3.194,
+        "val_loss": 3.209,
+        "val_chair_s": 34.01,
+        "val_bleu4": 6.304
+      },
+      {
+        "epoch": 11,
+        "train_loss": 3.2,
+        "val_loss": 3.206,
+        "val_chair_s": 31.53,
+        "val_bleu4": 5.994
+      },
+      {
+        "epoch": 12,
+        "train_loss": 3.202,
+        "val_loss": 3.206,
+        "val_chair_s": 31.84,
+        "val_bleu4": 5.999
+      }
+    ],
+    "object": [
+      {
+        "epoch": 1,
+        "train_loss": 5.845,
+        "val_loss": 4.594,
+        "val_chair_s": 58.0,
+        "val_bleu4": 3.032
+      },
+      {
+        "epoch": 2,
+        "train_loss": 4.365,
+        "val_loss": 3.835,
+        "val_chair_s": 36.22,
+        "val_bleu4": 11.721
+      },
+      {
+        "epoch": 3,
+        "train_loss": 3.896,
+        "val_loss": 3.556,
+        "val_chair_s": 28.41,
+        "val_bleu4": 16.085
+      },
+      {
+        "epoch": 4,
+        "train_loss": 3.658,
+        "val_loss": 3.413,
+        "val_chair_s": 24.89,
+        "val_bleu4": 17.318
+      },
+      {
+        "epoch": 5,
+        "train_loss": 3.502,
+        "val_loss": 3.316,
+        "val_chair_s": 25.88,
+        "val_bleu4": 18.942
+      },
+      {
+        "epoch": 6,
+        "train_loss": 3.403,
+        "val_loss": 3.253,
+        "val_chair_s": 27.06,
+        "val_bleu4": 19.673
+      },
+      {
+        "epoch": 7,
+        "train_loss": 3.305,
+        "val_loss": 3.222,
+        "val_chair_s": 25.21,
+        "val_bleu4": 20.633
+      },
+      {
+        "epoch": 8,
+        "train_loss": 3.263,
+        "val_loss": 3.191,
+        "val_chair_s": 24.4,
+        "val_bleu4": 21.182
+      },
+      {
+        "epoch": 9,
+        "train_loss": 3.207,
+        "val_loss": 3.175,
+        "val_chair_s": 24.58,
+        "val_bleu4": 20.906
+      },
+      {
+        "epoch": 10,
+        "train_loss": 3.176,
+        "val_loss": 3.166,
+        "val_chair_s": 23.97,
+        "val_bleu4": 20.887
+      },
+      {
+        "epoch": 11,
+        "train_loss": 3.169,
+        "val_loss": 3.164,
+        "val_chair_s": 24.1,
+        "val_bleu4": 20.725
+      },
+      {
+        "epoch": 12,
+        "train_loss": 3.16,
+        "val_loss": 3.162,
+        "val_chair_s": 24.03,
+        "val_bleu4": 20.421
+      }
+    ]
+  },
+  "dataset": {
+    "splits": {
+      "train": 4000,
+      "val": 500,
+      "test": 500
+    },
+    "captions": {
+      "train": 20010,
+      "val": 2503,
+      "test": 2501
+    },
+    "caption_length": {
+      "mean": 10.45,
+      "p50": 10,
+      "p95": 14,
+      "max": 39
+    },
+    "objects_per_image": {
+      "mean": 2.93,
+      "max": 14
+    },
+    "top_objects": [
+      {
+        "name": "person",
+        "count": 2693
+      },
+      {
+        "name": "chair",
+        "count": 580
+      },
+      {
+        "name": "car",
+        "count": 535
+      },
+      {
+        "name": "dining table",
+        "count": 501
+      },
+      {
+        "name": "cup",
+        "count": 390
+      },
+      {
+        "name": "bottle",
+        "count": 379
+      },
+      {
+        "name": "bowl",
+        "count": 314
+      },
+      {
+        "name": "handbag",
+        "count": 292
+      },
+      {
+        "name": "truck",
+        "count": 250
+      },
+      {
+        "name": "bench",
+        "count": 235
+      },
+      {
+        "name": "book",
+        "count": 230
+      },
+      {
+        "name": "backpack",
+        "count": 228
+      }
+    ],
+    "detector": {
+      "name": "fasterrcnn_mobilenet_v3_large_320_fpn",
+      "threshold": 0.3,
+      "max_detections": 12,
+      "mean_detections": 4.81,
+      "empty_images": 62,
+      "seconds": 782.9,
+      "images": 5000
+    }
+  },
+  "hallucination": {
+    "top_hallucinated": [
+      {
+        "name": "laptop",
+        "count": 71
+      },
+      {
+        "name": "dining table",
+        "count": 69
+      },
+      {
+        "name": "person",
+        "count": 68
+      },
+      {
+        "name": "bench",
+        "count": 63
+      },
+      {
+        "name": "bed",
+        "count": 47
+      },
+      {
+        "name": "sandwich",
+        "count": 45
+      },
+      {
+        "name": "skateboard",
+        "count": 42
+      },
+      {
+        "name": "fork",
+        "count": 33
+      },
+      {
+        "name": "clock",
+        "count": 30
+      },
+      {
+        "name": "dog",
+        "count": 25
+      },
+      {
+        "name": "surfboard",
+        "count": 25
+      },
+      {
+        "name": "tennis racket",
+        "count": 25
+      }
+    ],
+    "examples": [
+      {
+        "image_id": 724,
+        "image": "assets/images/724.jpg",
+        "references": [
+          "A stop sign installed upside down on a street corner",
+          "A stop sign is mounted upside-down on it's post.",
+          "A stop sign that is hanging upside down.",
+          "An upside down stop sign by the road.",
+          "a stop sign put upside down on a metal pole"
+        ],
+        "gt_objects": [
+          "car",
+          "stop sign",
+          "truck"
+        ],
+        "captions": {
+          "global": {
+            "text": "A street sign with a clock on it",
+            "hallucinated": [
+              "clock"
+            ]
+          },
+          "attention": {
+            "text": "A stop sign with a stop sign on a street",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A stop sign is on a street sign",
+            "hallucinated": []
+          }
+        }
+      },
+      {
+        "image_id": 776,
+        "image": "assets/images/776.jpg",
+        "references": [
+          "A group of three stuffed animal teddy bears.",
+          "Three stuffed animals are sitting on a bed.",
+          "Three stuffed bears hugging and sitting on a blue pillow",
+          "Three teddy bears, each a different color, snuggling together.",
+          "three teddy bears giving each other a hug"
+        ],
+        "gt_objects": [
+          "bed",
+          "teddy bear"
+        ],
+        "captions": {
+          "global": {
+            "text": "A teddy bear is sitting on a table",
+            "hallucinated": [
+              "dining table"
+            ]
+          },
+          "attention": {
+            "text": "A teddy bear sitting on a bed with a teddy bear",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A teddy bear sitting on a bed with a teddy bear",
+            "hallucinated": []
+          }
+        }
+      },
+      {
+        "image_id": 1425,
+        "image": "assets/images/1425.jpg",
+        "references": [
+          "A half eaten meal sitting on a plate.",
+          "A meal is lying on a plate on a table.",
+          "A plate with a burger that is halfway eaten.",
+          "A sandwich with a bite taken on a plate.",
+          "part of a sandwich sitting on a table"
+        ],
+        "gt_objects": [
+          "bowl",
+          "sandwich"
+        ],
+        "captions": {
+          "global": {
+            "text": "A plate of food with a fork and a fork",
+            "hallucinated": [
+              "fork"
+            ]
+          },
+          "attention": {
+            "text": "A plate of a plate of food on a plate",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A white plate with a plate of food",
+            "hallucinated": []
+          }
+        }
+      },
+      {
+        "image_id": 5529,
+        "image": "assets/images/5529.jpg",
+        "references": [
+          "A MAN IS SKIING ON THE SNOW SLOPES",
+          "A person on skis is skiing down a snowy hill.",
+          "A person on skis skiing down a mountain slope.",
+          "A person with green skis skiing down a big hill.",
+          "A skier is in the snow going downhill."
+        ],
+        "gt_objects": [
+          "person",
+          "skis"
+        ],
+        "captions": {
+          "global": {
+            "text": "A man is riding a wave on a surfboard",
+            "hallucinated": [
+              "surfboard"
+            ]
+          },
+          "attention": {
+            "text": "A man riding skis on a snowy hill",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A man riding skis on a snowy hill",
+            "hallucinated": []
+          }
+        }
+      },
+      {
+        "image_id": 6763,
+        "image": "assets/images/6763.jpg",
+        "references": [
+          "A happy man and woman pose for a picture.",
+          "A man and a women posing next to one another in front of a table.",
+          "A man and woman hugging in a restaurant",
+          "A man and woman posing for a picture in a sports bar.",
+          "A man and woman standing next to a table."
+        ],
+        "gt_objects": [
+          "cell phone",
+          "dining table",
+          "person",
+          "tie",
+          "tv"
+        ],
+        "captions": {
+          "global": {
+            "text": "A man in a suit and a woman holding a cake",
+            "hallucinated": [
+              "cake"
+            ]
+          },
+          "attention": {
+            "text": "A man standing in a room with a picture of a picture",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A man and a woman holding a picture of a man in a room",
+            "hallucinated": []
+          }
+        }
+      },
+      {
+        "image_id": 7784,
+        "image": "assets/images/7784.jpg",
+        "references": [
+          "A large orange and white kite flying in a blue sky.",
+          "A large white and red parasail in the blue sky.",
+          "There is a colorful parachute in the sky.",
+          "This is a large kite flying high in the sky.",
+          "a red and white parachute is in the sky"
+        ],
+        "gt_objects": [
+          "kite"
+        ],
+        "captions": {
+          "global": {
+            "text": "A large clock tower with a large clock on it",
+            "hallucinated": [
+              "clock"
+            ]
+          },
+          "attention": {
+            "text": "A large white and white photo of a blue sky",
+            "hallucinated": []
+          },
+          "object": {
+            "text": "A large kite flying in the sky",
+            "hallucinated": []
+          }
+        }
+      }
+    ]
+  },
+  "attention_examples": [
+    {
+      "image_id": 724,
+      "image": "assets/images/724.jpg",
+      "caption": "A stop sign with a stop sign on a street",
+      "words": [
+        "a",
+        "stop",
+        "sign",
+        "with",
+        "a",
+        "stop",
+        "sign",
+        "on",
+        "a",
+        "street"
+      ],
+      "overlays": [
+        {
+          "index": 1,
+          "word": "stop",
+          "path": "assets/attention/724_1.png"
+        },
+        {
+          "index": 2,
+          "word": "sign",
+          "path": "assets/attention/724_2.png"
+        },
+        {
+          "index": 5,
+          "word": "stop",
+          "path": "assets/attention/724_5.png"
+        },
+        {
+          "index": 6,
+          "word": "sign",
+          "path": "assets/attention/724_6.png"
+        }
+      ],
+      "highlight": [
+        1,
+        2,
+        5,
+        6
+      ]
+    },
+    {
+      "image_id": 4765,
+      "image": "assets/images/4765.jpg",
+      "caption": "A man riding a surfboard on a surfboard",
+      "words": [
+        "a",
+        "man",
+        "riding",
+        "a",
+        "surfboard",
+        "on",
+        "a",
+        "surfboard"
+      ],
+      "overlays": [
+        {
+          "index": 4,
+          "word": "surfboard",
+          "path": "assets/attention/4765_4.png"
+        },
+        {
+          "index": 7,
+          "word": "surfboard",
+          "path": "assets/attention/4765_7.png"
+        }
+      ],
+      "highlight": [
+        4,
+        7
+      ]
+    },
+    {
+      "image_id": 9448,
+      "image": "assets/images/9448.jpg",
+      "caption": "A woman holding a kite with a kite",
+      "words": [
+        "a",
+        "woman",
+        "holding",
+        "a",
+        "kite",
+        "with",
+        "a",
+        "kite"
+      ],
+      "overlays": [
+        {
+          "index": 4,
+          "word": "kite",
+          "path": "assets/attention/9448_4.png"
+        },
+        {
+          "index": 7,
+          "word": "kite",
+          "path": "assets/attention/9448_7.png"
+        }
+      ],
+      "highlight": [
+        4,
+        7
+      ]
+    },
+    {
+      "image_id": 12576,
+      "image": "assets/images/12576.jpg",
+      "caption": "A pizza with a pizza on a table",
+      "words": [
+        "a",
+        "pizza",
+        "with",
+        "a",
+        "pizza",
+        "on",
+        "a",
+        "table"
+      ],
+      "overlays": [
+        {
+          "index": 1,
+          "word": "pizza",
+          "path": "assets/attention/12576_1.png"
+        },
+        {
+          "index": 4,
+          "word": "pizza",
+          "path": "assets/attention/12576_4.png"
+        }
+      ],
+      "highlight": [
+        1,
+        4
+      ]
+    }
+  ],
+  "gallery": [
+    {
+      "image_id": 42889,
+      "image": "assets/images/42889.jpg",
+      "references": [
+        "A stuffed bear, a keyboard, an iPod and microphone.",
+        "A teddy bear sits by a keyboards and microphone.",
+        "A teddy bear that is dress in glasses and is listening to an iPod.",
+        "A very cute teddy bear with glasses and some items.",
+        "Stuffed bear wearing glasses with electronic audio equipment."
+      ],
+      "gt_objects": [
+        "keyboard",
+        "teddy bear"
+      ],
+      "captions": {
+        "global": {
+          "text": "A cat sitting on a bed with a laptop computer",
+          "hallucinated": [
+            "bed",
+            "cat",
+            "laptop"
+          ]
+        },
+        "attention": {
+          "text": "A cat is sitting on a desk with a laptop",
+          "hallucinated": [
+            "cat",
+            "laptop"
+          ]
+        },
+        "object": {
+          "text": "A man is sitting on a desk with a laptop",
+          "hallucinated": [
+            "laptop",
+            "person"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 47121,
+      "image": "assets/images/47121.jpg",
+      "references": [
+        "A black and white cat drinks water from a sink faucet.",
+        "A black cat drinking water out of a water faucet.",
+        "A cat drinking from a sink faucet that was left running.",
+        "A cat standing on the edge of a sink drink water.",
+        "a cat drinking water from a sink bowl"
+      ],
+      "gt_objects": [
+        "bottle",
+        "bowl",
+        "cat",
+        "sink"
+      ],
+      "captions": {
+        "global": {
+          "text": "A cat sitting on a bed in a chair",
+          "hallucinated": [
+            "bed",
+            "chair"
+          ]
+        },
+        "attention": {
+          "text": "A black and white cat laying on a bed",
+          "hallucinated": [
+            "bed"
+          ]
+        },
+        "object": {
+          "text": "A black and white cat is sitting on a wooden table",
+          "hallucinated": [
+            "dining table"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 54592,
+      "image": "assets/images/54592.jpg",
+      "references": [
+        "A person with some skis standing in the snow.",
+        "Couple of people walking up the snowy mountain with skis",
+        "Two people hiking up a mountain with their ski's.",
+        "Two people on a snow covered hill with skis.",
+        "Two people with snow gear on, carrying equipment."
+      ],
+      "gt_objects": [
+        "backpack",
+        "person",
+        "skis"
+      ],
+      "captions": {
+        "global": {
+          "text": "A man is riding a wave on a surfboard",
+          "hallucinated": [
+            "surfboard"
+          ]
+        },
+        "attention": {
+          "text": "A man is riding a skateboard on a skateboard",
+          "hallucinated": [
+            "skateboard"
+          ]
+        },
+        "object": {
+          "text": "A man is riding a snowboard on a snowy slope",
+          "hallucinated": [
+            "snowboard"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 61418,
+      "image": "assets/images/61418.jpg",
+      "references": [
+        "Several children attentively play a game of curling together.",
+        "Several children playing a game together outside with boats in the background.",
+        "Young children playing game on wooden deck surface.",
+        "a couple of kids playing a game of checkers.",
+        "some kids playing with some large checkerboards painted on the ground"
+      ],
+      "gt_objects": [
+        "boat",
+        "chair",
+        "person"
+      ],
+      "captions": {
+        "global": {
+          "text": "A man riding a horse on a beach",
+          "hallucinated": [
+            "horse"
+          ]
+        },
+        "attention": {
+          "text": "A man is riding a horse on a bench",
+          "hallucinated": [
+            "bench",
+            "horse"
+          ]
+        },
+        "object": {
+          "text": "A man is riding a skateboard on a bench",
+          "hallucinated": [
+            "bench",
+            "skateboard"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 63552,
+      "image": "assets/images/63552.jpg",
+      "references": [
+        "A cat looking directly into a magnifying glass on a table.",
+        "A cat that is standing looking through a glass.",
+        "An orange cat looks through a glass plate.",
+        "Orange cat looking in the mirror at his reflection",
+        "a beige cat looking into a big mirror"
+      ],
+      "gt_objects": [
+        "cat"
+      ],
+      "captions": {
+        "global": {
+          "text": "A cat sitting on a bed with a laptop and a laptop",
+          "hallucinated": [
+            "bed",
+            "laptop"
+          ]
+        },
+        "attention": {
+          "text": "A cat is sitting on a table with a cup of it",
+          "hallucinated": [
+            "cup",
+            "dining table"
+          ]
+        },
+        "object": {
+          "text": "A cat sitting on a white cat sitting on a table",
+          "hallucinated": [
+            "dining table"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 64574,
+      "image": "assets/images/64574.jpg",
+      "references": [
+        "A line of products on a white surface.",
+        "A pen and several personal hair care items sit side by side on a blanketed surface.",
+        "A pen, a plastic name bracelet, a barrette, a flashlight and a brush are lined up.",
+        "A pen, hairbrush, and other objects sitting on a bed.",
+        "A set of women's personal care items sitting on a bed."
+      ],
+      "gt_objects": [],
+      "captions": {
+        "global": {
+          "text": "A person holding a laptop on a desk",
+          "hallucinated": [
+            "laptop",
+            "person"
+          ]
+        },
+        "attention": {
+          "text": "A person holding a cell phone on a table",
+          "hallucinated": [
+            "cell phone",
+            "dining table",
+            "person"
+          ]
+        },
+        "object": {
+          "text": "A person holding a cell phone and a cup of a laptop",
+          "hallucinated": [
+            "cell phone",
+            "cup",
+            "laptop",
+            "person"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 70739,
+      "image": "assets/images/70739.jpg",
+      "references": [
+        "A couple of women sitting next to each other.",
+        "Two women sitting at a table with wine glasses in their hands.",
+        "Two women who are holding wine glasses.",
+        "a couple of women smile as they hold wine glasses",
+        "two women are having a glass of wine together"
+      ],
+      "gt_objects": [
+        "person",
+        "wine glass"
+      ],
+      "captions": {
+        "global": {
+          "text": "A man is sitting on a table with a cake",
+          "hallucinated": [
+            "cake",
+            "dining table"
+          ]
+        },
+        "attention": {
+          "text": "A man is sitting on a bed with a dog",
+          "hallucinated": [
+            "bed",
+            "dog"
+          ]
+        },
+        "object": {
+          "text": "A man holding a dog in a suit",
+          "hallucinated": [
+            "dog"
+          ]
+        }
+      }
+    },
+    {
+      "image_id": 89271,
+      "image": "assets/images/89271.jpg",
+      "references": [
+        "A cat is wearing an orange and brown hat.",
+        "A cat peeks over a chair while wearing a hat",
+        "A cat wearing a hat while resting it's paws on top of a chair.",
+        "Cat wearing a baseball cap with ears sticking out.",
+        "Tabby cat with green eyes wearing a hat"
+      ],
+      "gt_objects": [
+        "cat"
+      ],
+      "captions": {
+        "global": {
+          "text": "A cat sitting on a bed with a laptop",
+          "hallucinated": [
+            "bed",
+            "laptop"
+          ]
+        },
+        "attention": {
+          "text": "A cat sitting on a bed with a cat sitting on a table",
+          "hallucinated": [
+            "bed",
+            "dining table"
+          ]
+        },
+        "object": {
+          "text": "A cat sitting on a bed with a cat",
+          "hallucinated": [
+            "bed"
+          ]
+        }
+      }
+    }
+  ],
+  "figures": [
+    {
+      "id": "model_comparison",
+      "label": "Model comparison",
+      "path": "assets/figures/model_comparison.png",
+      "caption": "Caption quality (BLEU-1-4, CIDEr-D) and CHAIR hallucination for the three models on the 500-image test split; lower CHAIR is better."
+    },
+    {
+      "id": "bleu_vs_hallucination",
+      "label": "BLEU vs hallucination",
+      "path": "assets/figures/bleu_vs_hallucination.png",
+      "caption": "Sentence BLEU-4 against the number of hallucinated objects for all 1,500 pooled test captions, with a binned trend and bootstrap intervals."
+    },
+    {
+      "id": "training_curves",
+      "label": "Training curves",
+      "path": "assets/figures/training_curves.png",
+      "caption": "Training/validation loss and validation CHAIRs per epoch for each model (12 epochs, validation CHAIRs measured on the 500 validation images)."
+    },
+    {
+      "id": "attention_maps",
+      "label": "Attention maps",
+      "path": "assets/figures/attention_maps.png",
+      "caption": "Word-by-word 7x7 attention distributions for four held-out images; each column after the image is the attention at one generated word."
+    },
+    {
+      "id": "qualitative_examples",
+      "label": "Qualitative examples",
+      "path": "assets/figures/qualitative_examples.png",
+      "caption": "Side-by-side captions for held-out images with hallucinated object words highlighted in red."
+    }
+  ],
+  "artifacts": [
+    {
+      "label": "MAD-format report (DOCX)",
+      "path": "assets/downloads/MAD_Report_Image_Captioning.docx",
+      "kind": "docx",
+      "size": 3650331
+    },
+    {
+      "label": "MAD-format report (PDF)",
+      "path": "assets/downloads/MAD_Report_Image_Captioning.pdf",
+      "kind": "pdf",
+      "size": 1289215
+    },
+    {
+      "label": "Model comparison table (CSV)",
+      "path": "assets/downloads/model_comparison.csv",
+      "kind": "csv",
+      "size": 676
+    }
+  ]
+}

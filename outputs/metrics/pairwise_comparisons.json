@@ -1,0 +1,80 @@
+{
+  "global_vs_attention": {
+    "n_images": 500,
+    "hallucinated_objects": {
+      "mean_diff": 0.296,
+      "ci_low": 0.226,
+      "ci_high": 0.368,
+      "p_two_sided": 0.0
+    },
+    "hallucination_rate": {
+      "mean_diff": 0.218,
+      "ci_low": 0.17,
+      "ci_high": 0.268,
+      "p_two_sided": 0.0
+    },
+    "sentence_bleu4": {
+      "mean_diff": -3.267484453832645,
+      "ci_low": -4.183595552969177,
+      "ci_high": -2.4106817770388655,
+      "p_two_sided": 0.0
+    },
+    "mcnemar": {
+      "only_first_hallucinates": 150,
+      "only_second_hallucinates": 41,
+      "p_value": 8.427408773507354e-16
+    }
+  },
+  "global_vs_object": {
+    "n_images": 500,
+    "hallucinated_objects": {
+      "mean_diff": 0.46,
+      "ci_low": 0.394,
+      "ci_high": 0.532,
+      "p_two_sided": 0.0
+    },
+    "hallucination_rate": {
+      "mean_diff": 0.344,
+      "ci_low": 0.29595,
+      "ci_high": 0.39004999999999995,
+      "p_two_sided": 0.0
+    },
+    "sentence_bleu4": {
+      "mean_diff": -4.799656326231947,
+      "ci_low": -5.713039937782117,
+      "ci_high": -3.8468018319751316,
+      "p_two_sided": 0.0
+    },
+    "mcnemar": {
+      "only_first_hallucinates": 197,
+      "only_second_hallucinates": 25,
+      "p_value": 2.449169564137423e-34
+    }
+  },
+  "attention_vs_object": {
+    "n_images": 500,
+    "hallucinated_objects": {
+      "mean_diff": 0.164,
+      "ci_low": 0.10995,
+      "ci_high": 0.22004999999999997,
+      "p_two_sided": 0.0
+    },
+    "hallucination_rate": {
+      "mean_diff": 0.126,
+      "ci_low": 0.08195000000000001,
+      "ci_high": 0.17,
+      "p_two_sided": 0.0
+    },
+    "sentence_bleu4": {
+      "mean_diff": -1.5321718723993014,
+      "ci_low": -2.473222622665429,
+      "ci_high": -0.6032142270013485,
+      "p_two_sided": 0.0
+    },
+    "mcnemar": {
+      "only_first_hallucinates": 101,
+      "only_second_hallucinates": 38,
+      "p_value": 8.817540782360309e-08
+    }
+  }
+}
